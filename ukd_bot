@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+import reddit
+import os, sys
+import json
+import re
+
+class UKBot(object):
+    def __init__(self):
+        self.api = reddit.Reddit(user_agent='uk-dota-bot')
+        self.api.login('uk-dota-bot', open('password').read().strip())
+        print 'logged in'
+        self.userFile = 'users'
+        if os.path.isfile(self.userFile):
+            self.users = json.load(open(self.userFile))
+            print 'opening users'
+        else:
+            self.users = {}
+            print 'user file "%s" not found, starting afresh' % \
+                os.path.realpath(self.userFile)
+
+        print 'opening postcode file'
+        self.postcodes = json.load(open('uk-postcode'))
+
+    def checkMessages(self):
+        l = reddit.objects.LoggedInRedditor(self.api)
+        for m in l.get_unread():
+            self.parseMessage(str(m))
+
+    def parseMessage(self, m):
+        lines = m.split('\n')
+        user = lines[0][6:]
+        
+        message = '\n'.join(lines[3:])
+        postcodes = re.findall('[A-Z][A-Z]?\d\d?', message.upper())
+        if len(postcodes) > 0:
+            self.users[user] = postcodes[0]
+            print 'new user:', user, 'from', self.getLocation(postcodes[0])
+            json.dump(self.users, open(self.userFile, 'w'))
+        else:
+            print 'looks like a false alert! No postcode found'
+
+    def getLocation(self, postcode):
+        l = self.postcodes[postcode]
+        return l['town'], l['county']
+
+    def updatePost(self):
+        text = '''Hello, this is an automated list of the locations of members of
+/r/UKDota. This should make it easy to find other people around
+your area.
+
+If you want your name here, [send a message to
+/u/uk-dota-bot](http://www.reddit.com/message/compose/?to=uk-dota-bot&subject=this%20bit%20is%20ignored)
+with the first part of your postcode (1-2 letters followed by 1-2 numbers e.g. CB4), and this
+post will be regenerated after a short delay.
+
+If there are any problems or unwanted behavior with this bot, contact /u/kragniz
+
+-------------------------
+
+'''
+        places = {}
+
+        for user, postcode in self.users.items():
+            print user, postcode
+            l = self.getLocation(postcode)
+            if places.has_key(l[1]):
+                places[l[1]] += [(user, l[0])]
+            else:
+                places[l[1]] = [(user, l[0])]
+
+        for place, users in places.items():
+            
+
+            text += '| ' + place + ' | |\n'
+            text += '|:-|:-:|\n'
+            for user in users:
+                text += '| /u/'+user[0] + ' | ' +  user[1] + ' |\n'
+            text += '\n'
+
+        botUser = reddit.objects.Redditor(self.api, user_name='uk-dota-bot')
+        for p in botUser.get_submitted():
+            p.edit(text)
+
+if __name__ == '__main__':
+    u = UKBot()
+    u.checkMessages()
+    u.updatePost()
