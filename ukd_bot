@@ -3,6 +3,7 @@ import reddit
 import os, sys
 import json
 import re
+import time
 
 class UKBot(object):
     def __init__(self):
@@ -24,7 +25,11 @@ class UKBot(object):
     def checkMessages(self):
         l = reddit.objects.LoggedInRedditor(self.api)
         for m in l.get_unread():
+            print 'we have a new message!'
             self.parseMessage(str(m))
+            m.mark_as_read()
+            return True
+        return False
 
     def parseMessage(self, m):
         lines = m.split('\n')
@@ -69,10 +74,8 @@ If there are any problems or unwanted behavior with this bot, contact /u/kragniz
                 places[l[1]] = [(user, l[0])]
 
         for place, users in places.items():
-            
-
             text += '| ' + place + ' | |\n'
-            text += '|:-|:-:|\n'
+            text += '|:-|:-|\n'
             for user in users:
                 text += '| /u/'+user[0] + ' | ' +  user[1] + ' |\n'
             text += '\n'
@@ -83,5 +86,7 @@ If there are any problems or unwanted behavior with this bot, contact /u/kragniz
 
 if __name__ == '__main__':
     u = UKBot()
-    u.checkMessages()
-    u.updatePost()
+    while True:
+        if u.checkMessages():
+            u.updatePost()
+        time.sleep(10)
