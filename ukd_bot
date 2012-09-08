@@ -43,7 +43,8 @@ class UKBot(object):
 
         m = m.body
         postcodes = re.findall('[A-Z][A-Z]?\d\d?', m.upper())
-        steamid = re.findall('https?://steamcommunity.com/.+', m)
+        steamid = re.findall('https?://steamcommunity.com/.+', m,
+                flags=re.IGNORECASE)
 
         if len(steamid) > 0:
             steamid = steamid[0]
@@ -52,7 +53,7 @@ class UKBot(object):
 
         if len(postcodes) > 0:
             self.users[user] = (postcodes[0], steamid)
-            self.log('new user:', user, 'from', self.getLocation(postcodes[0]))
+            self.log('\033[93mnew user:', user, 'from', self.getLocation(postcodes[0]))
             json.dump(self.users, open(self.userFile, 'w'))
         else:
             self.log('looks like a false alert! No postcode found')
@@ -109,7 +110,7 @@ there are any problems or unwanted behavior with this bot, contact /u/kragniz
 
     def log(self, *args):
         print '\033[94m' + time.asctime() + '\033[0m',
-        print(' '.join(args))
+        print ' '.join([str(s) for s in args]) + '\033[0m'
 
 if __name__ == '__main__':
     u = UKBot()
