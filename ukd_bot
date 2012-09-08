@@ -31,18 +31,19 @@ class UKBot(object):
         l = reddit.objects.LoggedInRedditor(self.api)
         for m in l.get_unread():
             print 'we have a new message!'
-            self.parseMessage(str(m))
+            print 'body:', m.body
+            self.parseMessage(m)
             m.mark_as_read()
             return True
         return False
 
     def parseMessage(self, m):
-        lines = m.split('\n')
-        user = lines[0][6:]
-        
-        message = '\n'.join(lines[3:])
-        postcodes = re.findall('[A-Z][A-Z]?\d\d?', message.upper())
-        steamid = re.findall('https?://steamcommunity.com/.+', message)
+        user = str(m).split('\n')[0][6:]
+        print 'user:', user
+
+        m = m.body
+        postcodes = re.findall('[A-Z][A-Z]?\d\d?', m.upper())
+        steamid = re.findall('https?://steamcommunity.com/.+', m)
 
         if len(steamid) > 0:
             steamid = steamid[0]
