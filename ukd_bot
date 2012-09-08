@@ -14,24 +14,24 @@ class UKBot(object):
     def __init__(self):
         self.api = reddit.Reddit(user_agent='uk-dota-bot')
         self.api.login('uk-dota-bot', open('password').read().strip())
-        print 'logged in'
+        self.log('logged in')
         self.userFile = 'users'
         if os.path.isfile(self.userFile):
             self.users = json.load(open(self.userFile))
-            print 'opening users'
+            self.log('opening users')
         else:
             self.users = {}
-            print 'user file "%s" not found, starting afresh' % \
-                os.path.realpath(self.userFile)
+            self.log('user file "%s" not found, starting afresh' % \
+                os.path.realpath(self.userFile))
 
-        print 'opening postcode file'
+        self.log('opening postcode file')
         self.postcodes = json.load(open('uk-postcode'))
 
     def checkMessages(self):
         l = reddit.objects.LoggedInRedditor(self.api)
         for m in l.get_unread():
-            print 'we have a new message!'
-            print 'body:', m.body
+            self.log('we have a new message!')
+            self.log('body:', m.body)
             self.parseMessage(m)
             m.mark_as_read()
             return True
@@ -39,7 +39,7 @@ class UKBot(object):
 
     def parseMessage(self, m):
         user = str(m).split('\n')[0][6:]
-        print 'user:', user
+        self.log('user:', user)
 
         m = m.body
         postcodes = re.findall('[A-Z][A-Z]?\d\d?', m.upper())
@@ -52,10 +52,10 @@ class UKBot(object):
 
         if len(postcodes) > 0:
             self.users[user] = (postcodes[0], steamid)
-            print 'new user:', user, 'from', self.getLocation(postcodes[0])
+            self.log('new user:', user, 'from', self.getLocation(postcodes[0]))
             json.dump(self.users, open(self.userFile, 'w'))
         else:
-            print 'looks like a false alert! No postcode found'
+            self.log('looks like a false alert! No postcode found')
 
     def getLocation(self, postcode):
         if self.postcodes.has_key(postcode):
@@ -84,7 +84,6 @@ there are any problems or unwanted behavior with this bot, contact /u/kragniz
         places = {}
 
         for user, data in self.users.items():
-            print user, data
             postcode = data[0]
             steamid = data[1]
 
@@ -95,7 +94,7 @@ there are any problems or unwanted behavior with this bot, contact /u/kragniz
                 else:
                     places[l[1]] = [(user, l[0], steamid)]
 
-        for place, users in places.items():
+        for place, users in sorted(places.items()):
             text += '''| %s | | *%s* |
 |:-|:-|:-
 ''' % (place, '1 person' if len(users) == 1 else str(len(users)) + ' people')
@@ -107,6 +106,10 @@ there are any problems or unwanted behavior with this bot, contact /u/kragniz
         botUser = reddit.objects.Redditor(self.api, user_name='uk-dota-bot')
         for p in botUser.get_submitted():
             p.edit(text)
+
+    def log(self, *args):
+        print '\033[94m' + time.asctime() + '\033[0m',
+        print(' '.join(args))
 
 if __name__ == '__main__':
     u = UKBot()
