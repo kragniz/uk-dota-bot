@@ -42,7 +42,7 @@ class UKBot(object):
         
         message = '\n'.join(lines[3:])
         postcodes = re.findall('[A-Z][A-Z]?\d\d?', message.upper())
-        steamid = re.findall('http://steamcommunity.com/id/\w+', message)
+        steamid = re.findall('https?://steamcommunity.com/.+', message)
 
         if len(steamid) > 0:
             steamid = steamid[0]
