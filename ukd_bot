@@ -52,8 +52,13 @@ class UKBot(object):
             steamid = ''
 
         if len(postcodes) > 0:
-            self.users[user] = (postcodes[0], steamid)
-            self.log('\033[93mnew user:', user, 'from', self.getLocation(postcodes[0]))
+            if len(postcodes[0][1]) > 1:
+                loc = 'IRELAND'
+            else:
+                loc = postcodes[0][0]
+            self.users[user] = (loc, steamid)
+            self.log('\033[93mnew user:', user, 'from',
+                    self.getLocation(loc))
             json.dump(self.users, open(self.userFile, 'w'))
         else:
             self.log('looks like a false alert! No postcode found')
