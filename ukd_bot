@@ -42,7 +42,7 @@ class UKBot(object):
         self.log('user:', user)
 
         m = m.body
-        postcodes = re.findall('[A-Z][A-Z]?\d\d?', m.upper())
+        postcodes = re.findall('([A-Z][A-Z]?\d\d?)|(IRELAND)', m.upper())
         steamid = re.findall('https?://steamcommunity.com/.+', m,
                 flags=re.IGNORECASE)
 
@@ -72,7 +72,7 @@ class UKBot(object):
 If you want your name here, [send a message to
 /u/uk-dota-bot](http://www.reddit.com/message/compose/?to=uk-dota-bot&subject=this%20bit%20is%20ignored)
 with the first part of your postcode (1-2 letters followed by 1-2 numbers,
-e.g. CB4) and optionally your steamID on seperate lines, [like
+e.g. CB4. If you're from Ireland, use IRELAND instead) and optionally your steamID on seperate lines, [like
 this](http://i.imgur.com/PBeoul.png). After a short delay,
 this post will be regenerated.
 
