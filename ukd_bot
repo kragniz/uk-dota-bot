@@ -110,6 +110,11 @@ there are any problems or unwanted behavior with this bot, contact /u/kragniz
                         '[profile]('+user[2]+')' if user[2] else '') 
             text += '\n'
 
+        text += '''
+-------------------------
+
+        Post last updated on %s''' % time.asctime()
+
         botUser = reddit.objects.Redditor(self.api, user_name='uk-dota-bot')
         for p in botUser.get_submitted():
             p.edit(text)
