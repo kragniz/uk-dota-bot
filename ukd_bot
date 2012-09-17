@@ -9,6 +9,7 @@ import os, sys
 import json
 import re
 import time
+from urllib2 import HTTPError
 
 class UKBot(object):
     def __init__(self):
@@ -121,6 +122,9 @@ if __name__ == '__main__':
     u = UKBot()
     u.updatePost()
     while True:
-        if u.checkMessages():
-            u.updatePost()
+        try:
+            if u.checkMessages():
+                u.updatePost()
+        except HTTPError:
+            print 'Looks like reddit might be a bit overloaded'
         time.sleep(10)
