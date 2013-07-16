@@ -60,7 +60,11 @@ class UKBot(object):
             self.users[user] = (loc, steamid)
             self.log('\033[93mnew user:', user, 'from',
                     self.getLocation(loc))
-            json.dump(self.users, open(self.userFile, 'w'))
+            json.dump(self.users, open(self.userFile, 'w'),
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(',', ': ')
+                     )
         else:
             self.log('looks like a false alert! No postcode found')
 
